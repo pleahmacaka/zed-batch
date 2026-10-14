@@ -1,6 +1,6 @@
 id = "windows-batch"
 name = "Windows Batch"
-version = "0.3.0"
+version = "0.4.0"
 schema_version = 1
 authors = ["PleahMaCaka <pleahmacaka@gmail.com>"]
 description = "Windows Batch/CMD script support"
