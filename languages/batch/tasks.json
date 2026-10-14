@@ -1,0 +1,19 @@
+[
+  {
+    "label": "Run $ZED_FILENAME",
+    "command": "& $env:ZED_FILE; exit $LASTEXITCODE",
+    "shell": { "with_arguments": { "program": "powershell", "args": ["-NoProfile"] } },
+    "cwd": "$ZED_DIRNAME",
+    "save": "current",
+    "allow_concurrent_runs": true,
+    "tags": ["batch-run"]
+  },
+  {
+    "label": "Run $ZED_FILENAME as Administrator",
+    "command": "$ErrorActionPreference = 'Stop'; $file = $env:ZED_FILE; $dir = $env:ZED_DIRNAME; $q = [string][char]39; $admin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator); if ($admin) { & $file; exit $LASTEXITCODE }; $run = 'Set-Location -LiteralPath {0}{1}{0}; & {0}{2}{0}; $code = $LASTEXITCODE' -f $q, $dir.Replace($q, $q + $q), $file.Replace($q, $q + $q); $mode = (Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Sudo -ErrorAction SilentlyContinue).Enabled; $policy = (Get-ItemProperty HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Sudo -ErrorAction SilentlyContinue).EnableSudo; if ($mode -eq 3 -and $policy -in $null, 3) { $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($run + '; exit $code')); sudo.exe --inline powershell -NoProfile -EncodedCommand $encoded; exit $LASTEXITCODE }; $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($run + '; Read-Host ''Press Enter to close''; exit $code')); try { $p = Start-Process powershell -Verb RunAs -Wait -PassThru -ArgumentList '-NoProfile', '-EncodedCommand', $encoded } catch { Write-Host 'UAC canceled'; exit 1 }; exit $p.ExitCode",
+    "shell": { "with_arguments": { "program": "powershell", "args": ["-NoProfile"] } },
+    "cwd": "$ZED_DIRNAME",
+    "save": "current",
+    "tags": ["batch-run"]
+  }
+]
